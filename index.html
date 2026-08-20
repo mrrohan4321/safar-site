@@ -180,11 +180,42 @@
   #yt-player-wrap{position:fixed;bottom:6px;right:6px;width:100px;height:56px;opacity:0.01;pointer-events:none;z-index:0;}
   #yt-player{width:100%;height:100%;}
 
-  @media (max-width:480px){
-    .bar{flex-wrap:wrap;}
-    .meta{order:2;flex:1 1 100%;}
-    .transport{order:1;}
-    .thumb{order:0;}
+  @media (max-width:600px){
+    body{
+      justify-content:center;
+      padding:24px 16px;
+    }
+    .wrap{max-width:420px;}
+
+    .bar{
+      flex-wrap:wrap;
+      justify-content:center;
+      text-align:center;
+      padding:22px 18px 18px;
+      gap:0;
+    }
+    .thumb{
+      order:0;
+      width:96px;height:96px;flex:0 0 96px;
+      border-radius:16px;
+      margin:0 auto 14px;
+    }
+    .meta{order:1;flex:1 1 100%;min-width:0;}
+    .meta .title{white-space:normal;text-align:center;font-size:16px;}
+    .meta .artist{text-align:center;margin-bottom:14px;}
+    .prow{flex-wrap:wrap;justify-content:center;}
+    .bar-wrap{flex:1 1 100%;order:0;}
+    .timepair{order:1;width:100%;text-align:center;margin-top:6px;}
+    .transport{
+      order:2;flex:1 1 100%;
+      justify-content:center;
+      margin-top:16px;
+      gap:22px;
+    }
+
+    .subrow{flex-wrap:wrap;justify-content:center;gap:12px;}
+    .subrow-left{order:1;}
+    .queue-toggle{order:0;}
   }
 </style>
 </head>
