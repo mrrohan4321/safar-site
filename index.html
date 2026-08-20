@@ -36,16 +36,10 @@
   }
   .bg-photo{
     position:fixed;inset:0;
-    width:100%;height:100%;
-    object-fit:cover;
-    object-position:center center;
+    background-size:cover;background-position:center;
     filter:brightness(0.62) saturate(1.05);
-    z-index:0;
-    opacity:0;transition:opacity 0.8s ease;
-  }
-  .bg-photo.loaded{opacity:1;}
-  @media (max-width:600px){
-    .bg-photo{ object-position:center 30%; }
+    transform:scale(1.06);
+    z-index:0;transition:opacity 1.2s ease;
   }
   .grain{
     position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -196,7 +190,7 @@
 </head>
 <body>
 
-<img class="bg-photo" id="bgPhoto" alt="">
+<div class="bg-photo" id="bgPhoto"></div>
 <div class="grain"></div>
 
 <div class="wrap">
@@ -204,7 +198,7 @@
     <span class="brand">safar</span>
     <div class="statusbar-right">
       <span class="clock" id="clock">--:--</span>
-      <a class="yt-link" id="ytLink" href="https://youtube.com/playlist?list=PLCjuYOW0NjJ8" target="_blank" rel="noopener">
+      <a class="yt-link" id="ytLink" href="https://youtube.com/playlist?list=PLCjuYOW0NjJ8&si=T1dL9Zz69jqCaegP" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12z"/></svg>
         YouTube ↗
       </a>
@@ -271,22 +265,21 @@
   updateClock(); setInterval(updateClock, 15000);
 
   // ---------- background photo (Drive link, with fallback) ----------
-  const DRIVE_ID = "1YeVAu_sdRdHJxT0zylzeXEmAZmqWFSU8";
+  const DRIVE_ID = "1ixPTIRj42hm7UE3p9W8TTOObVucBKU3q";
   const bgCandidates = [
     `https://lh3.googleusercontent.com/d/${DRIVE_ID}=w1920`,
     `https://drive.google.com/uc?export=view&id=${DRIVE_ID}`
   ];
   (function tryBg(i){
     if(i>=bgCandidates.length) return;
-    const el = document.getElementById('bgPhoto');
-    const test = new Image();
-    test.onload = () => { el.src = bgCandidates[i]; el.classList.add('loaded'); };
-    test.onerror = () => tryBg(i+1);
-    test.src = bgCandidates[i];
+    const img = new Image();
+    img.onload = () => { document.getElementById('bgPhoto').style.backgroundImage = `url(${bgCandidates[i]})`; };
+    img.onerror = () => tryBg(i+1);
+    img.src = bgCandidates[i];
   })(0);
 
   // ---------- YouTube IFrame API ----------
-  const PLAYLIST_ID = "PLCjuYOW0NjJ8";
+  const PLAYLIST_ID = "PLq-bT4s33RYADNkcClDkLPovaKJx0HTDM";
   let player, isPlaying=false, isShuffled=false, isRepeat=true, seeking=false, readyFired=false;
   let playlistIds = [], oembedCache = {};
 
@@ -392,7 +385,7 @@
   async function getOembed(id){
     if(oembedCache[id]) return oembedCache[id];
     try{
-      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);
+      const res = await fetch(`https://youtube.com/playlist?list=PLCjuYOW0NjJ8&si=T1dL9Zz69jqCaegP&v=${id}&format=json`);
       const json = await res.json();
       oembedCache[id] = json;
       return json;
