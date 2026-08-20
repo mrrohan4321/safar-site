@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Safar</title>
+<title>Safar — ad-free plays</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -36,10 +36,16 @@
   }
   .bg-photo{
     position:fixed;inset:0;
-    background-size:cover;background-position:center;
+    width:100%;height:100%;
+    object-fit:cover;
+    object-position:center center;
     filter:brightness(0.62) saturate(1.05);
-    transform:scale(1.06);
-    z-index:0;transition:opacity 1.2s ease;
+    z-index:0;
+    opacity:0;transition:opacity 0.8s ease;
+  }
+  .bg-photo.loaded{opacity:1;}
+  @media (max-width:600px){
+    .bg-photo{ object-position:center 30%; }
   }
   .grain{
     position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -190,7 +196,7 @@
 </head>
 <body>
 
-<div class="bg-photo" id="bgPhoto"></div>
+<img class="bg-photo" id="bgPhoto" alt="">
 <div class="grain"></div>
 
 <div class="wrap">
@@ -265,17 +271,18 @@
   updateClock(); setInterval(updateClock, 15000);
 
   // ---------- background photo (Drive link, with fallback) ----------
-  const DRIVE_ID = "1ixPTIRj42hm7UE3p9W8TTOObVucBKU3q";
+  const DRIVE_ID = "1YeVAu_sdRdHJxT0zylzeXEmAZmqWFSU8";
   const bgCandidates = [
     `https://lh3.googleusercontent.com/d/${DRIVE_ID}=w1920`,
     `https://drive.google.com/uc?export=view&id=${DRIVE_ID}`
   ];
   (function tryBg(i){
     if(i>=bgCandidates.length) return;
-    const img = new Image();
-    img.onload = () => { document.getElementById('bgPhoto').style.backgroundImage = `url(${bgCandidates[i]})`; };
-    img.onerror = () => tryBg(i+1);
-    img.src = bgCandidates[i];
+    const el = document.getElementById('bgPhoto');
+    const test = new Image();
+    test.onload = () => { el.src = bgCandidates[i]; el.classList.add('loaded'); };
+    test.onerror = () => tryBg(i+1);
+    test.src = bgCandidates[i];
   })(0);
 
   // ---------- YouTube IFrame API ----------
