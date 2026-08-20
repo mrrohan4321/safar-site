@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">  
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Safar — ad-free plays</title>
+<title>Safar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -198,7 +198,7 @@
     <span class="brand">safar</span>
     <div class="statusbar-right">
       <span class="clock" id="clock">--:--</span>
-      <a class="yt-link" id="ytLink" href="https://youtube.com/playlist?list=PLCjuYOW0NjJ8&si=CkbuxGGLNm9bbyGc" target="_blank" rel="noopener">
+      <a class="yt-link" id="ytLink" href="https://youtube.com/playlist?list=PLCjuYOW0NjJ8" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12z"/></svg>
         YouTube ↗
       </a>
@@ -279,7 +279,7 @@
   })(0);
 
   // ---------- YouTube IFrame API ----------
-  const PLAYLIST_ID = "PLq-bT4s33RYADNkcClDkLPovaKJx0HTDM";
+  const PLAYLIST_ID = "PLCjuYOW0NjJ8";
   let player, isPlaying=false, isShuffled=false, isRepeat=true, seeking=false, readyFired=false;
   let playlistIds = [], oembedCache = {};
 
@@ -385,7 +385,7 @@
   async function getOembed(id){
     if(oembedCache[id]) return oembedCache[id];
     try{
-      const res = await fetch(`https://youtube.com/playlist?list=PLCjuYOW0NjJ8&si=CkbuxGGLNm9bbyGc&v=${id}&format=json`);
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);
       const json = await res.json();
       oembedCache[id] = json;
       return json;
