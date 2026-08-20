@@ -51,8 +51,9 @@
 
   /* --- slim status bar: clock + open on youtube --- */
   .statusbar{
+    position:fixed;top:0;left:0;right:0;z-index:5;
     display:flex;justify-content:space-between;align-items:center;
-    padding:0 6px;margin-bottom:10px;
+    padding:16px 22px;
     font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.5px;
     color:rgba(245,239,230,0.85);
   }
@@ -217,6 +218,41 @@
     .subrow-left{order:1;}
     .queue-toggle{order:0;}
   }
+  .hero{
+    text-align:center;
+    margin:56px 6px 26px;
+  }
+  .hero-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-style:italic;
+    letter-spacing:1px;
+    font-size:clamp(40px, 9vw, 88px);
+    line-height:0.98;
+    margin:0;
+    color:var(--text);
+    text-shadow:0 8px 30px rgba(0,0,0,0.55);
+  }
+  .hero-tagline-bn{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(15px, 2.6vw, 19px);
+    color:var(--text);
+    margin:10px 0 2px;
+    text-shadow:0 4px 16px rgba(0,0,0,0.5);
+  }
+  .hero-tagline-en{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0;
+  }
+
+  @media (max-width:600px){
+    .hero{margin:48px 6px 20px;}
+  }
 </style>
 </head>
 <body>
@@ -235,6 +271,13 @@
       </a>
     </div>
   </div>
+
+  <div class="hero">
+    <h1 class="hero-title">safar</h1>
+    <p class="hero-tagline-bn">প্রতিটা রাস্তার নিজের একটা গান থাকে</p>
+    <p class="hero-tagline-en">every road has a song of its own</p>
+  </div>
+
   <div class="bar">
     <div class="thumb" id="thumb"></div>
     <div class="meta">
