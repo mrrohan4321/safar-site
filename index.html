@@ -34,16 +34,12 @@
     overflow-x:hidden;
     background: radial-gradient(circle at 30% 20%, #241c15 0%, #0e0c0a 60%);
   }
-  .bg-video{
+  .bg-photo{
     position:fixed;inset:0;
-    width:100%;height:100%;
-    object-fit:cover;object-position:center;
+    background-size:cover;background-position:center;
     filter:brightness(0.62) saturate(1.05);
     transform:scale(1.06);
     z-index:0;transition:opacity 1.2s ease;
-  }
-  @media (max-width:600px){
-    .bg-video{ object-position:center 35%; }
   }
   .grain{
     position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -225,7 +221,7 @@
 </head>
 <body>
 
-<video class="bg-video" id="bgVideo" autoplay muted loop playsinline src="safar-bg.mp4"></video>
+<div class="bg-photo" id="bgPhoto"></div>
 <div class="grain"></div>
 
 <div class="wrap">
@@ -299,12 +295,25 @@
   }
   updateClock(); setInterval(updateClock, 15000);
 
-  // ---------- background video ----------
-  // Same video used for desktop and mobile; CSS object-fit/object-position
-  // handles the crop so it looks right on both.
-  const bgVideo = document.getElementById('bgVideo');
-  bgVideo.playbackRate = 0.6;
-  bgVideo.play().catch(()=>{ /* autoplay may need a user gesture on some browsers */ });
+  // ---------- background photo (Drive link, with fallback) ----------
+  // Different photo for phones vs laptop/PC.
+  const DRIVE_ID_DESKTOP = "1ixPTIRj42hm7UE3p9W8TTOObVucBKU3q";
+  const DRIVE_ID_MOBILE  = "1YeVAu_sdRdHJxT0zylzeXEmAZmqWFSU8";
+
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 600;
+  const DRIVE_ID = isMobile ? DRIVE_ID_MOBILE : DRIVE_ID_DESKTOP;
+
+  const bgCandidates = [
+    `https://lh3.googleusercontent.com/d/${DRIVE_ID}=w1920`,
+    `https://drive.google.com/uc?export=view&id=${DRIVE_ID}`
+  ];
+  (function tryBg(i){
+    if(i>=bgCandidates.length) return;
+    const img = new Image();
+    img.onload = () => { document.getElementById('bgPhoto').style.backgroundImage = `url(${bgCandidates[i]})`; };
+    img.onerror = () => tryBg(i+1);
+    img.src = bgCandidates[i];
+  })(0);
 
   // ---------- YouTube IFrame API ----------
   const PLAYLIST_ID = "PLCjuYOW0NjJ8";
