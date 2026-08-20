@@ -369,6 +369,7 @@
     document.getElementById('statusNote').textContent = '';
     playlistIds = player.getPlaylist() || [];
     buildQueue();
+    refreshTrackInfo();
     setVolume(document.getElementById('volSlider').value);
     setInterval(tick, 500);
   }
@@ -409,7 +410,8 @@
   }
 
   async function refreshTrackInfo(){
-    const idx = player.getPlaylistIndex();
+    let idx = player.getPlaylistIndex();
+    if(idx < 0) idx = 0;
     const id = playlistIds[idx];
     if(!id) return;
     const data = await getOembed(id);
