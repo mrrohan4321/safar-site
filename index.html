@@ -265,7 +265,13 @@
   updateClock(); setInterval(updateClock, 15000);
 
   // ---------- background photo (Drive link, with fallback) ----------
-  const DRIVE_ID = "1ixPTIRj42hm7UE3p9W8TTOObVucBKU3q";
+  // Different photo for phones vs laptop/PC.
+  const DRIVE_ID_DESKTOP = "1ixPTIRj42hm7UE3p9W8TTOObVucBKU3q";
+  const DRIVE_ID_MOBILE  = "1YeVAu_sdRdHJxT0zylzeXEmAZmqWFSU8";
+
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 600;
+  const DRIVE_ID = isMobile ? DRIVE_ID_MOBILE : DRIVE_ID_DESKTOP;
+
   const bgCandidates = [
     `https://lh3.googleusercontent.com/d/${DRIVE_ID}=w1920`,
     `https://drive.google.com/uc?export=view&id=${DRIVE_ID}`
