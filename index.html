@@ -236,6 +236,24 @@
 
   .footer{text-align:center;margin-top:14px;font-size:10.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.4px;}
 
+  /* --- custom glow cursor (desktop / fine-pointer devices only) --- */
+  body.custom-cursor-active, body.custom-cursor-active *{ cursor:none !important; }
+  .cursor-glow{
+    position:fixed;top:0;left:0;width:26px;height:26px;border-radius:50%;
+    pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+    background:radial-gradient(circle, var(--track-accent) 0%, transparent 70%);
+    opacity:0;mix-blend-mode:screen;
+    transition:opacity .25s ease, width .25s ease, height .25s ease, background 1.2s ease;
+  }
+  .cursor-glow.hover{ width:46px;height:46px; opacity:0.8; }
+  .cursor-dot{
+    position:fixed;top:0;left:0;width:5px;height:5px;border-radius:50%;
+    pointer-events:none;z-index:10000;transform:translate(-50%,-50%);
+    background:var(--text);opacity:0;
+    transition:opacity .25s ease, transform .15s ease;
+  }
+  .cursor-dot.hover{ transform:translate(-50%,-50%) scale(2); background:var(--track-accent); }
+
   /* --- playlist switcher pills --- */
   .playlist-switcher{
     display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
@@ -258,8 +276,8 @@
 
   @media (max-width:600px){
     body{
-      justify-content:center;
-      padding:24px 16px;
+      justify-content:flex-end;
+      padding:24px 16px 64px;
     }
     .wrap{max-width:420px;}
 
@@ -870,6 +888,59 @@
   });
 
   window.addEventListener('appinstalled', hideInstallBanner);
+
+  // ---------- ambiance: custom glow cursor ----------
+  // only for real mice/trackpads (fine pointer) — never touches touch devices.
+  (function initCustomCursor(){
+    if(!window.matchMedia('(pointer: fine)').matches) return;
+
+    document.body.classList.add('custom-cursor-active');
+    const glow = document.createElement('div'); glow.className = 'cursor-glow';
+    const dot = document.createElement('div'); dot.className = 'cursor-dot';
+    document.body.appendChild(glow);
+    document.body.appendChild(dot);
+
+    let mx = window.innerWidth/2, my = window.innerHeight/2;
+    let gx = mx, gy = my;
+    let shown = false;
+
+    window.addEventListener('mousemove', (e)=>{
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+      if(!shown){
+        shown = true;
+        dot.style.opacity = '1';
+        glow.style.opacity = glow.classList.contains('hover') ? '0.8' : '0.5';
+      }
+    });
+    window.addEventListener('mouseleave', ()=>{
+      dot.style.opacity = '0'; glow.style.opacity = '0'; shown = false;
+    });
+
+    function raf(){
+      gx += (mx - gx) * 0.16;
+      gy += (my - gy) * 0.16;
+      glow.style.left = gx + 'px'; glow.style.top = gy + 'px';
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // widen the glow slightly over anything clickable
+    const interactive = 'a, button, input[type=range], .pl-pill, .qitem, .ctrl-btn, .toggle-btn';
+    document.addEventListener('mouseover', (e)=>{
+      if(e.target.closest(interactive)){
+        glow.classList.add('hover'); dot.classList.add('hover');
+        if(shown) glow.style.opacity = '0.8';
+      }
+    });
+    document.addEventListener('mouseout', (e)=>{
+      if(e.target.closest(interactive)){
+        glow.classList.remove('hover'); dot.classList.remove('hover');
+        if(shown) glow.style.opacity = '0.5';
+      }
+    });
+  })();
+
 
   // ---------- ambiance: parallax background ----------
   // subtle depth: bg photo + tint drift opposite to mouse movement (desktop)
