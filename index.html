@@ -283,28 +283,26 @@
 
     .bar{
       flex-wrap:wrap;
-      justify-content:center;
-      text-align:center;
-      padding:14px 16px 12px;
-      gap:0;
+      padding:10px 14px 10px;
+      gap:10px;
     }
     .thumb{
       order:0;
-      width:64px;height:64px;flex:0 0 64px;
-      border-radius:14px;
-      margin:0 auto 10px;
+      width:46px;height:46px;flex:0 0 46px;
+      border-radius:10px;
+      margin:0;
     }
-    .meta{order:1;flex:1 1 100%;min-width:0;}
-    .meta .title{white-space:normal;text-align:center;font-size:14.5px;}
-    .meta .artist{text-align:center;margin-bottom:9px;font-size:12px;}
-    .prow{flex-wrap:wrap;justify-content:center;}
-    .bar-wrap{flex:1 1 100%;order:0;}
-    .timepair{order:1;width:100%;text-align:center;margin-top:5px;}
+    .meta{order:1;flex:1 1 auto;min-width:0;}
+    .meta .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;font-size:13px;}
+    .meta .artist{text-align:left;margin:1px 0 5px;font-size:11px;}
+    .prow{flex-wrap:nowrap;justify-content:flex-start;}
+    .bar-wrap{flex:1 1 auto;order:0;}
+    .timepair{order:1;width:auto;margin:0 0 0 8px;}
     .transport{
       order:2;flex:1 1 100%;
       justify-content:center;
-      margin-top:10px;
-      gap:20px;
+      margin-top:6px;
+      gap:18px;
     }
 
     .subrow{flex-wrap:wrap;justify-content:center;gap:12px;}
