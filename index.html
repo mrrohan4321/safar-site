@@ -267,26 +267,26 @@
       flex-wrap:wrap;
       justify-content:center;
       text-align:center;
-      padding:22px 18px 18px;
+      padding:14px 16px 12px;
       gap:0;
     }
     .thumb{
       order:0;
-      width:96px;height:96px;flex:0 0 96px;
-      border-radius:16px;
-      margin:0 auto 14px;
+      width:64px;height:64px;flex:0 0 64px;
+      border-radius:14px;
+      margin:0 auto 10px;
     }
     .meta{order:1;flex:1 1 100%;min-width:0;}
-    .meta .title{white-space:normal;text-align:center;font-size:16px;}
-    .meta .artist{text-align:center;margin-bottom:14px;}
+    .meta .title{white-space:normal;text-align:center;font-size:14.5px;}
+    .meta .artist{text-align:center;margin-bottom:9px;font-size:12px;}
     .prow{flex-wrap:wrap;justify-content:center;}
     .bar-wrap{flex:1 1 100%;order:0;}
-    .timepair{order:1;width:100%;text-align:center;margin-top:6px;}
+    .timepair{order:1;width:100%;text-align:center;margin-top:5px;}
     .transport{
       order:2;flex:1 1 100%;
       justify-content:center;
-      margin-top:16px;
-      gap:22px;
+      margin-top:10px;
+      gap:20px;
     }
 
     .subrow{flex-wrap:wrap;justify-content:center;gap:12px;}
@@ -326,7 +326,7 @@
   }
 
   @media (max-width:600px){
-    .hero{margin:48px 6px 20px;}
+    .hero{margin:36px 6px 16px;}
   }
 
   /* --- install app banner --- */
@@ -383,8 +383,8 @@
 
 <div class="bg-photo" id="bgPhoto"></div>
 <div class="track-tint" id="trackTint"></div>
-<canvas class="dust-canvas" id="dustCanvas"></canvas>
 <div class="grain"></div>
+<canvas class="dust-canvas" id="dustCanvas"></canvas>
 
 <div class="wrap">
   <div class="statusbar">
@@ -931,14 +931,14 @@
       canvas.width = w * dpr; canvas.height = h * dpr;
       canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.min(70, Math.round((w*h) / 18000));
+      const count = Math.min(110, Math.round((w*h) / 12000));
       particles = Array.from({length: count}, ()=>({
         x: Math.random()*w,
         y: Math.random()*h,
-        r: Math.random()*1.6 + 0.4,
-        baseAlpha: Math.random()*0.32 + 0.08,
-        speedY: Math.random()*0.15 + 0.05,
-        driftAmp: Math.random()*14 + 4,
+        r: Math.random()*2.2 + 0.8,
+        baseAlpha: Math.random()*0.5 + 0.18,
+        speedY: Math.random()*0.18 + 0.06,
+        driftAmp: Math.random()*16 + 4,
         driftFreq: Math.random()*0.0006 + 0.0002,
         phase: Math.random()*Math.PI*2
       }));
