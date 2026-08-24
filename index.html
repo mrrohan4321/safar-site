@@ -4,6 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Safar</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e0c0a">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Safar">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -178,6 +185,23 @@
 
   .footer{text-align:center;margin-top:14px;font-size:10.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:0.4px;}
 
+  /* --- playlist switcher pills --- */
+  .playlist-switcher{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
+    margin:0 6px 18px;
+  }
+  .pl-pill{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.5px;
+    color:var(--muted);background:rgba(0,0,0,0.28);
+    border:1px solid var(--card-border);border-radius:20px;
+    padding:6px 13px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+  }
+  .pl-pill:hover{color:var(--text);border-color:rgba(245,239,230,0.3);}
+  .pl-pill.active{
+    color:var(--bg);background:var(--amber);border-color:var(--amber);font-weight:500;
+  }
+
+
   #yt-player-wrap{position:fixed;bottom:6px;right:6px;width:100px;height:56px;opacity:0.01;pointer-events:none;z-index:0;}
   #yt-player{width:100%;height:100%;}
 
@@ -278,6 +302,8 @@
     <p class="hero-tagline-en">every road has a song of its own</p>
   </div>
 
+  <div class="playlist-switcher" id="playlistSwitcher"></div>
+
   <div class="bar">
     <div class="thumb" id="thumb"></div>
     <div class="meta">
@@ -359,16 +385,45 @@
   })(0);
 
   // ---------- YouTube IFrame API ----------
-  const PLAYLIST_ID = "PLCjuYOW0NjJ8";
+  // Add more playlists here — each needs a short label and the YouTube playlist ID
+  // (the part after list= in the playlist URL).
+  const PLAYLISTS = [
+    { label: "safar", id: "PLCjuYOW0NjJ8" }
+  ];
+  let currentPlaylistIdx = 0;
   let player, isPlaying=false, isShuffled=false, isRepeat=true, seeking=false, readyFired=false;
   let playlistIds = [], oembedCache = {};
+
+  function renderPlaylistSwitcher(){
+    const wrap = document.getElementById('playlistSwitcher');
+    if(PLAYLISTS.length < 2){ wrap.style.display = 'none'; return; }
+    wrap.innerHTML = '';
+    PLAYLISTS.forEach((pl, i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'pl-pill' + (i===currentPlaylistIdx ? ' active' : '');
+      btn.textContent = pl.label;
+      btn.addEventListener('click', ()=> switchPlaylist(i));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function switchPlaylist(i){
+    if(i === currentPlaylistIdx || !player || !player.loadPlaylist) return;
+    currentPlaylistIdx = i;
+    renderPlaylistSwitcher();
+    document.getElementById('ytLink').href = `https://youtube.com/playlist?list=${PLAYLISTS[i].id}`;
+    document.getElementById('titleText').textContent = 'Loading playlist…';
+    document.getElementById('artistText').textContent = '\u00a0';
+    player.loadPlaylist({ listType: 'playlist', list: PLAYLISTS[i].id });
+  }
 
   const tag = document.createElement('script');
   tag.src = "https://www.youtube.com/iframe_api";
   document.body.appendChild(tag);
 
   window.onYouTubeIframeAPIReady = function(){
-    const vars = { listType:'playlist', list: PLAYLIST_ID, autoplay:0, controls:0 };
+    renderPlaylistSwitcher();
+    const vars = { listType:'playlist', list: PLAYLISTS[currentPlaylistIdx].id, autoplay:0, controls:0 };
     // only pass origin on a real http(s) origin — on file:// or sandboxed/opaque
     // origins this breaks the postMessage handshake and the player hangs forever.
     if(/^https?:$/.test(window.location.protocol)){
@@ -426,6 +481,8 @@
     } else if(e.data === YT.PlayerState.ENDED){
       if(isRepeat){ playIndex((player.getPlaylistIndex()+1) % playlistIds.length); }
     } else if(e.data === YT.PlayerState.CUED){
+      playlistIds = player.getPlaylist() || [];
+      buildQueue();
       refreshTrackInfo();
     }
   }
@@ -434,6 +491,9 @@
     document.getElementById('playIcon').innerHTML = isPlaying
       ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>'
       : '<path d="M8 5v14l11-7z"/>';
+    if('mediaSession' in navigator){
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
   }
 
   function tick(){
@@ -462,7 +522,41 @@
     document.getElementById('artistText').textContent = data.author_name;
     document.getElementById('thumb').style.backgroundImage = `url(${data.thumbnail_url})`;
     highlightQueue(idx);
+    updateMediaSession(data);
   }
+
+  // ---------- Media Session API ----------
+  // lets phone/desktop lock screen, notification shade, and hardware media
+  // keys show track info and control playback.
+  function updateMediaSession(data){
+    if(!('mediaSession' in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: data.title || 'Safar',
+      artist: data.author_name || '',
+      album: 'Safar',
+      artwork: data.thumbnail_url ? [
+        { src: data.thumbnail_url, sizes: '480x360', type: 'image/jpeg' }
+      ] : []
+    });
+  }
+
+  function setupMediaSessionHandlers(){
+    if(!('mediaSession' in navigator)) return;
+    navigator.mediaSession.setActionHandler('play', ()=>{ if(player) player.playVideo(); });
+    navigator.mediaSession.setActionHandler('pause', ()=>{ if(player) player.pauseVideo(); });
+    navigator.mediaSession.setActionHandler('previoustrack', ()=>{ if(player) player.previousVideo(); });
+    navigator.mediaSession.setActionHandler('nexttrack', ()=>{
+      if(!player) return;
+      if(isShuffled) playIndex(Math.floor(Math.random()*playlistIds.length));
+      else player.nextVideo();
+    });
+    try{
+      navigator.mediaSession.setActionHandler('seekto', (details)=>{
+        if(player && player.seekTo && !details.fastSeek) player.seekTo(details.seekTime, true);
+      });
+    }catch(err){ /* seekto not supported everywhere */ }
+  }
+  setupMediaSessionHandlers();
 
   async function getOembed(id){
     if(oembedCache[id]) return oembedCache[id];
@@ -545,6 +639,54 @@
     document.querySelectorAll('.qitem').forEach(el=>{
       el.classList.toggle('current', Number(el.dataset.idx)===idx);
     });
+  }
+
+  // ---------- PWA: register service worker ----------
+  // only on real http(s) origins — file:// and sandboxed previews don't
+  // support service workers, so this fails silently there.
+  if('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{ /* ignore in unsupported contexts */ });
+    });
+  }
+
+  // ---------- keyboard shortcuts ----------
+  // Space: play/pause | ←/→: prev/next | ↑/↓: volume up/down
+  document.addEventListener('keydown', function(e){
+    // don't hijack keys while user is interacting with an input/slider/link
+    const tag = (e.target.tagName || '').toLowerCase();
+    if(tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+
+    switch(e.code){
+      case 'Space':
+        e.preventDefault();
+        document.getElementById('playBtn').click();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        document.getElementById('nextBtn').click();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        document.getElementById('prevBtn').click();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        bumpVolume(5);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        bumpVolume(-5);
+        break;
+    }
+  });
+
+  function bumpVolume(delta){
+    const slider = document.getElementById('volSlider');
+    let v = Number(slider.value) + delta;
+    v = Math.max(0, Math.min(100, v));
+    slider.value = v;
+    setVolume(v);
   }
 </script>
 </body>
