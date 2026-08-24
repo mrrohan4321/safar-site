@@ -63,6 +63,7 @@
     padding:16px 22px;
     font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.5px;
     color:rgba(245,239,230,0.85);
+    transition:top .2s ease;
   }
   .statusbar-right{display:flex;align-items:center;gap:12px;}
   .clock{opacity:0.9;}
@@ -277,9 +278,58 @@
   @media (max-width:600px){
     .hero{margin:48px 6px 20px;}
   }
+
+  /* --- install app banner --- */
+  .install-banner{
+    position:fixed;top:0;left:0;right:0;z-index:20;
+    display:none;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 16px;
+    background:linear-gradient(90deg, rgba(193,102,107,0.95), rgba(232,163,61,0.95));
+    color:#0e0c0a;
+    font-family:'Inter',sans-serif;
+    box-shadow:0 6px 20px -6px rgba(0,0,0,0.5);
+  }
+  .install-banner.show{display:flex;}
+  .install-banner-text{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:600;min-width:0;
+  }
+  .install-banner-text svg{width:18px;height:18px;flex:none;}
+  .install-banner-sub{
+    font-weight:400;font-size:11.5px;opacity:0.85;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .install-banner-actions{display:flex;align-items:center;gap:8px;flex:none;}
+  .install-btn{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
+    background:#0e0c0a;color:var(--amber);
+    border:none;border-radius:20px;padding:7px 14px;cursor:pointer;
+    white-space:nowrap;
+  }
+  .install-btn:hover{opacity:0.88;}
+  .install-dismiss{
+    background:none;border:none;color:#0e0c0a;opacity:0.7;cursor:pointer;
+    font-size:18px;line-height:1;padding:4px;
+  }
+  .install-dismiss:hover{opacity:1;}
+
+  @media (max-width:600px){
+    .install-banner-sub{display:none;}
+  }
 </style>
 </head>
 <body>
+
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-text">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" opacity="0"/><path d="M12 16l-6-6h4V4h4v6h4l-6 6z"/><path d="M5 18h14v2H5z"/></svg>
+    <span>Install Safar as an app<span class="install-banner-sub"> — quick access, no browser bar</span></span>
+  </div>
+  <div class="install-banner-actions">
+    <button class="install-btn" id="installBtn">Install</button>
+    <button class="install-dismiss" id="installDismiss" title="Dismiss">&times;</button>
+  </div>
+</div>
 
 <div class="bg-photo" id="bgPhoto"></div>
 <div class="grain"></div>
@@ -649,6 +699,68 @@
       navigator.serviceWorker.register('sw.js').catch(()=>{ /* ignore in unsupported contexts */ });
     });
   }
+
+  // ---------- install app banner ----------
+  const installBanner = document.getElementById('installBanner');
+  const installBtn = document.getElementById('installBtn');
+  const installDismiss = document.getElementById('installDismiss');
+  const statusbarEl = document.querySelector('.statusbar');
+  let deferredInstallPrompt = null;
+
+  function showInstallBanner(){
+    if(sessionStorage.getItem('installBannerDismissed')) return;
+    installBanner.classList.add('show');
+    // push the fixed status bar down so it doesn't sit under the banner
+    requestAnimationFrame(()=>{
+      statusbarEl.style.top = installBanner.offsetHeight + 'px';
+    });
+  }
+  function hideInstallBanner(){
+    installBanner.classList.remove('show');
+    statusbarEl.style.top = '0px';
+  }
+
+  // already running as an installed app? never show the banner.
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+
+  if(!isStandalone){
+    // Chrome/Edge/Android: real install prompt, fired when installable.
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      showInstallBanner();
+    });
+
+    // iOS Safari never fires beforeinstallprompt — show the banner with
+    // manual "Add to Home Screen" instructions instead.
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if(isIOS && isSafari){
+      installBtn.textContent = 'How?';
+      showInstallBanner();
+    }
+  }
+
+  installBtn.addEventListener('click', async ()=>{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      if(choice.outcome === 'accepted') hideInstallBanner();
+    } else {
+      // iOS manual path
+      document.getElementById('statusNote').innerHTML =
+        'Tap the Share icon <b>⬆</b> in Safari, then "Add to Home Screen".';
+    }
+  });
+
+  installDismiss.addEventListener('click', ()=>{
+    sessionStorage.setItem('installBannerDismissed', '1');
+    hideInstallBanner();
+  });
+
+  window.addEventListener('appinstalled', hideInstallBanner);
 
   // ---------- keyboard shortcuts ----------
   // Space: play/pause | ←/→: prev/next | ↑/↓: volume up/down
