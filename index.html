@@ -944,13 +944,16 @@
     const bgPhoto = document.getElementById('bgPhoto');
     const trackTint = document.getElementById('trackTint');
     const maxShift = 16; // px
+    const degPerMs = 360 / (5 * 60 * 1000); // one full 360° turn every 5 minutes — barely perceptible, just alive
     let targetX = 0, targetY = 0, curX = 0, curY = 0, running = true;
 
-    function frame(){
+    function frame(ts){
       if(!running) return;
       curX += (targetX - curX) * 0.06;
       curY += (targetY - curY) * 0.06;
-      bgPhoto.style.transform = `translate3d(${curX}px, ${curY}px, 0) scale(1.06)`;
+      const angle = (ts * degPerMs) % 360;
+      // scaled up well beyond cover so the rotated edges never show empty corners
+      bgPhoto.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${angle.toFixed(2)}deg) scale(1.55)`;
       trackTint.style.transform = `translate3d(${(curX*0.6).toFixed(2)}px, ${(curY*0.6).toFixed(2)}px, 0)`;
       requestAnimationFrame(frame);
     }
