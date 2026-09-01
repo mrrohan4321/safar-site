@@ -73,6 +73,4 @@ Currently deployed on [Netlify](https://www.netlify.com/). Since it's a static s
 
 ## License
 
-Copyright (c) 2026 Rohan
-
-Feel free to use, modify, share, and learn from this project, for personal or commercial purposes. Provided as-is, without warranty.
+Feel free to use, modify, and learn from this project.
