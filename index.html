@@ -24,8 +24,7 @@
     --text: #f5efe6;
     --muted: #b8afa2;
     --divider: rgba(245,239,230,0.12);
-    --track-accent: var(--amber);
-    --track-accent-glow: rgba(232,163,61,0.35);
+    --amber-glow: rgba(232,163,61,0.35);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -51,12 +50,6 @@
     transform:scale(1.06);
     z-index:0;transition:opacity 1.2s ease;
     will-change:transform;
-  }
-  .track-tint{
-    position:fixed;inset:0;z-index:0;pointer-events:none;
-    mix-blend-mode:overlay;opacity:0.6;
-    background:radial-gradient(circle at 30% 22%, var(--track-accent) 0%, transparent 62%);
-    transition:background 1.4s ease;
   }
   .grain{
     position:fixed;inset:-20px;z-index:1;pointer-events:none;
@@ -137,13 +130,13 @@
   .thumb{
     width:56px;height:56px;border-radius:12px;flex:0 0 56px;
     background-size:cover;background-position:center;background-color:#241d17;
-    box-shadow:0 4px 12px rgba(0,0,0,0.4), 0 0 26px 2px var(--track-accent-glow);
+    box-shadow:0 4px 12px rgba(0,0,0,0.4), 0 0 26px 2px var(--amber-glow);
     transition:box-shadow 1.2s ease;
   }
   @media (prefers-reduced-motion: no-preference){
     @keyframes breathe-thumb{
-      0%,100%{ box-shadow:0 4px 12px rgba(0,0,0,0.4), 0 0 26px 2px var(--track-accent-glow); }
-      50%{ box-shadow:0 4px 12px rgba(0,0,0,0.4), 0 0 46px 10px var(--track-accent-glow); }
+      0%,100%{ box-shadow:0 4px 12px rgba(0,0,0,0.4), 0 0 26px 2px var(--amber-glow); }
+      50%{ box-shadow:0 4px 12px rgba(0,0,0,0.4), 0 0 46px 10px var(--amber-glow); }
     }
     .thumb.breathing{ animation:breathe-thumb 2.6s ease-in-out infinite; }
   }
@@ -158,8 +151,8 @@
   }
   .prow{display:flex;align-items:center;gap:9px;}
   .bar-wrap{position:relative;flex:1;height:4px;border-radius:4px;background:rgba(245,239,230,0.16);cursor:pointer;}
-  .bar-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--rose),var(--track-accent));width:0%;transition:background 1.2s ease;}
-  .bar-handle{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:var(--track-accent);transform:translate(-50%,-50%);left:0%;box-shadow:0 0 0 4px var(--track-accent-glow);transition:background 1.2s ease, box-shadow 1.2s ease;}
+  .bar-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--rose),var(--amber));width:0%;transition:background 1.2s ease;}
+  .bar-handle{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:var(--amber);transform:translate(-50%,-50%);left:0%;box-shadow:0 0 0 4px var(--amber-glow);transition:background 1.2s ease, box-shadow 1.2s ease;}
   .timepair{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;flex:none;}
 
   .transport{display:flex;align-items:center;gap:10px;flex:none;}
@@ -179,8 +172,8 @@
   .play-btn svg{width:16px;height:16px;}
   @media (prefers-reduced-motion: no-preference){
     @keyframes breathe-ring{
-      0%,100%{ box-shadow:0 6px 16px -4px rgba(245,239,230,0.4), 0 0 0 0 var(--track-accent-glow); }
-      50%{ box-shadow:0 6px 16px -4px rgba(245,239,230,0.4), 0 0 20px 7px var(--track-accent-glow); }
+      0%,100%{ box-shadow:0 6px 16px -4px rgba(245,239,230,0.4), 0 0 0 0 var(--amber-glow); }
+      50%{ box-shadow:0 6px 16px -4px rgba(245,239,230,0.4), 0 0 20px 7px var(--amber-glow); }
     }
     .play-btn.breathing{ animation:breathe-ring 2.6s ease-in-out infinite; }
     .play-btn.breathing:hover{ animation-play-state:paused; }
@@ -238,7 +231,7 @@
   .cursor-glow{
     position:fixed;top:0;left:0;width:26px;height:26px;border-radius:50%;
     pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
-    background:radial-gradient(circle, var(--track-accent) 0%, transparent 70%);
+    background:radial-gradient(circle, var(--amber) 0%, transparent 70%);
     opacity:0;mix-blend-mode:screen;
     transition:opacity .25s ease, width .25s ease, height .25s ease, background 1.2s ease;
   }
@@ -249,7 +242,7 @@
     background:var(--text);opacity:0;
     transition:opacity .25s ease, transform .15s ease;
   }
-  .cursor-dot.hover{ transform:translate(-50%,-50%) scale(2); background:var(--track-accent); }
+  .cursor-dot.hover{ transform:translate(-50%,-50%) scale(2); background:var(--amber); }
 
   /* --- playlist switcher pills --- */
   .playlist-switcher{
@@ -395,7 +388,6 @@
 </div>
 
 <div class="bg-photo" id="bgPhoto"></div>
-<div class="track-tint" id="trackTint"></div>
 <div class="grain"></div>
 
 <div class="wrap">
@@ -639,61 +631,6 @@
     document.getElementById('thumb').style.backgroundImage = `url(${data.thumbnail_url})`;
     highlightQueue(idx);
     updateMediaSession(data);
-    applyTrackAccent(data.thumbnail_url);
-  }
-
-  // ---------- ambiance: dominant color from the track's thumbnail ----------
-  // pulls the average vivid color out of the thumbnail and feeds it into
-  // --track-accent, which the progress bar, thumb glow, and background
-  // tint all read from — so the whole vibe shifts a little per track.
-  const accentCache = {};
-  async function applyTrackAccent(thumbUrl){
-    if(!thumbUrl) return;
-    if(accentCache[thumbUrl]){
-      setTrackAccent(accentCache[thumbUrl]);
-      return;
-    }
-    const rgb = await extractDominantColor(thumbUrl);
-    if(!rgb) return; // canvas blocked (CORS) — just keep the previous accent
-    accentCache[thumbUrl] = rgb;
-    setTrackAccent(rgb);
-  }
-
-  function setTrackAccent({r,g,b}){
-    document.documentElement.style.setProperty('--track-accent', `rgb(${r},${g},${b})`);
-    document.documentElement.style.setProperty('--track-accent-glow', `rgba(${r},${g},${b},0.45)`);
-  }
-
-  function extractDominantColor(url){
-    return new Promise((resolve)=>{
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = ()=>{
-        try{
-          const size = 24;
-          const canvas = document.createElement('canvas');
-          canvas.width = size; canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, size, size);
-          const px = ctx.getImageData(0, 0, size, size).data;
-          let r=0, g=0, b=0, count=0;
-          for(let i=0;i<px.length;i+=4){
-            const rr=px[i], gg=px[i+1], bb=px[i+2], alpha=px[i+3];
-            if(alpha < 200) continue;
-            const lum = (rr+gg+bb)/3;
-            // skip near-black / near-white pixels so the average stays vivid
-            if(lum < 25 || lum > 235) continue;
-            r+=rr; g+=gg; b+=bb; count++;
-          }
-          if(count === 0){ resolve({r:232,g:163,b:61}); return; } // fallback: amber
-          resolve({ r:Math.round(r/count), g:Math.round(g/count), b:Math.round(b/count) });
-        }catch(err){
-          resolve(null); // canvas tainted by a non-CORS image — bail quietly
-        }
-      };
-      img.onerror = ()=> resolve(null);
-      img.src = url;
-    });
   }
 
   // ---------- Media Session API ----------
@@ -942,19 +879,14 @@
   (function initParallax(){
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const bgPhoto = document.getElementById('bgPhoto');
-    const trackTint = document.getElementById('trackTint');
     const maxShift = 16; // px
-    const degPerMs = 360 / (5 * 60 * 1000); // one full 360° turn every 5 minutes — barely perceptible, just alive
     let targetX = 0, targetY = 0, curX = 0, curY = 0, running = true;
 
-    function frame(ts){
+    function frame(){
       if(!running) return;
       curX += (targetX - curX) * 0.06;
       curY += (targetY - curY) * 0.06;
-      const angle = (ts * degPerMs) % 360;
-      // scaled up well beyond cover so the rotated edges never show empty corners
-      bgPhoto.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${angle.toFixed(2)}deg) scale(1.55)`;
-      trackTint.style.transform = `translate3d(${(curX*0.6).toFixed(2)}px, ${(curY*0.6).toFixed(2)}px, 0)`;
+      bgPhoto.style.transform = `translate3d(${curX}px, ${curY}px, 0) scale(1.06)`;
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
